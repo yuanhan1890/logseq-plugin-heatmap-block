@@ -1,23 +1,30 @@
-# Logseq Heatmap Plugin
+# Logseq Heatmap Block Plugin
 
-This plugin will render a GitHub/Flomo style heatmap based on how many journal
-blocks created that day.
+This plugin renders a heatmap based on a provided data query and offers minor styling configurations. You can use it to track habits.
 
-Once Logseq provides an option to denote all blocks with timestamps, we may
-be able to calculate a more accurate block numbers.
+## How to Use
 
-## How to use?
+Type `/Heatmap` to automatically generate a data query that tracks the content of a specific block reference across each daily log, along with a JSON code block where you can write your chart parameters.
 
-Firstly, turn on Logseq developer mode
+For the query results, the plugin will attempt to parse whether they contain numbers. If parsing fails, it will default to a count of `1`, and then aggregate the total for that day.
 
-### Option 1: directly install via Marketplace
+| Parameter | Type | Description |
+| -------- | -------- | -------- |
+| formattedData | Array<{ date: string, count: number }> | Retrieved via the data query; date format is "YYYY-MM-DD" |
+| weeksToShows | number? | The time period to display (in weeks) |
+| title | string? | Chart title |
+| titleAlign | "left" \| "right" \| "center" | Chart title alignment |
+| unit | string? | Unit for the number of activities |
+| unitPural | string? | Plural unit for the number of activities |
+| colorPalette | string[]? | Custom colors; features levels 0–4 by default. Custom colors only support 6-digit hex codes |
+| defaultFill | string? | Default background color for elements |
+| showTotalTimes | boolean? | Display total number of times |
+| showActiveDays | boolean? | Display total number of active days |
+| showPeakDays | boolean? | Display maximum count in a single day |
+| showLongestStreak | boolean? | Display the longest continuous active streak |
 
-### Option 2: manually load
-
-- [download the prebuilt package here](https://github.com/pengx17/logseq-plugin-heatmap/releases)
-- unzip the zip file and load from Logseq plugins page
 
 ## Demo
 
-![](./heatmap-demo.gif)
-![](./daterange-selection.gif)
+![](./demo.png)
+![](./demo1.png)

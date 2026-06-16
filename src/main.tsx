@@ -5,6 +5,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Calendar } from "./Calendar";
 import { provideStyle } from "./provideStyle";
+import { groupBy, map, mapValues, sumBy } from "lodash-es";
 
 function main() {
   const pluginId = logseq.baseInfo.id;
@@ -27,6 +28,42 @@ function main() {
     return `${s.substring(0, 4)}-${s.substring(4, 6)}-${s.substring(6, 8)}`;
   }
 
+  logseq.Editor.registerSlashCommand("Heatmap", async (e) => {
+    const currentBlockUuid = e.uuid;
+
+    await logseq.Editor.insertAtEditingCursor(
+      `{{renderer :heatmap_${currentBlockUuid}}}`,
+    );
+
+    const clojureContent = `\`\`\`clojure
+[:find ?page-day ?block-content
+ :where
+   [?b :block/page ?p]
+   [?p :block/journal? true]
+   [?p :block/journal-day ?page-day]
+   [?b :block/refs ?ref]
+   [?ref :block/uuid #uuid "6a314c09-158e-4cfd-b8c8-a1257ade3008"]
+   [?b :block/content ?block-content]
+]
+\`\`\``;
+    const firstChild = await logseq.Editor.insertBlock(
+      currentBlockUuid,
+      clojureContent,
+      {
+        sibling: false, // false 表示作为子 block 插入
+        before: false, // 插入在父 block 的最底下
+      },
+    );
+
+    if (firstChild) {
+      const jsonContent = `\`\`\`json\n{}\n\`\`\``;
+      await logseq.Editor.insertBlock(firstChild.uuid, jsonContent, {
+        sibling: true, // true 表示和 firstChild 属于同级（兄弟关系）
+        before: false, // 放在 firstChild 的后面
+      });
+    }
+  });
+
   provideStyle();
 
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
@@ -35,7 +72,7 @@ function main() {
     if (!type) return;
 
     const heatmapId = `heatmap_${uuid}_${slot}`;
-    if (type !== ":heatmap" && type !== "heatmap") return;
+    if (!type.startsWith(":heatmap") && !type.startsWith("heatmap")) return;
 
     const blk = await logseq.Editor.getBlock(uuid, {
       includeChildren: true,
@@ -61,14 +98,29 @@ function main() {
     try {
       const queryResult: any[] = await logseq.DB.datascriptQuery(queryString);
 
-      const formattedData = queryResult.map((item: any) => {
-        const page = item[0];
-        const count = item[1];
-        return {
-          date: formatJournalDay(page["journal-day"]),
-          count,
-        };
-      });
+      const formattedData = map(
+        mapValues(
+          groupBy(
+            queryResult.map((item: any) => {
+              const journalDay = item[0];
+              const content = item[1];
+              const cleanedContent = content.replace(
+                /\(\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\)\)/gi,
+                "",
+              );
+              let count = cleanedContent.match(/\d+/);
+              count = count != null ? Number(count[0]) : 1;
+              return {
+                date: formatJournalDay(journalDay),
+                count,
+              };
+            }),
+            "date",
+          ),
+          (record) => sumBy(record, "count"),
+        ),
+        (value, key) => ({ date: key, count: value }),
+      );
 
       const secondChild = blk.children[1] as BlockEntity;
       let attributes = {};

@@ -5,8 +5,6 @@ import { maxBy, minBy } from "lodash-es";
 import { getLongestStreak, useThemeMode } from "./utils";
 import { getInterpolatedColor } from "./color";
 
-const NUM_WEEKS = 25;
-
 const attrStyle: CSSProperties = {
   marginLeft: "8px",
   padding: "4px 8px",
@@ -18,8 +16,12 @@ type Datum = {
   count: number;
 };
 
+const NUM_WEEKS = 25;
+
 export const Calendar = ({
   formattedData,
+  startDate: _startDate,
+  endDate: _endDate,
   title = "Activity Heatmap",
   titleAlign = "center",
   unit = "Time",
@@ -32,6 +34,8 @@ export const Calendar = ({
   showLongestStreak = true,
 }: {
   formattedData: { date: string; count: number }[];
+  startDate?: string;
+  endDate?: string;
   title?: string;
   titleAlign?: "left" | "center" | "right";
   unit?: string;
@@ -43,12 +47,18 @@ export const Calendar = ({
   showPeakDay?: boolean;
   showLongestStreak?: boolean;
 }) => {
-  const startDate = dayjs()
-    .subtract(NUM_WEEKS, "week")
-    .startOf("week")
-    .toDate();
+  const startDateDayjs = _startDate
+    ? dayjs(_startDate, "YYYY-MM-DD")
+    : dayjs().subtract(NUM_WEEKS, "week").startOf("week");
 
-  const endDate = useMemo(() => dayjs().endOf("day").toDate(), []);
+  const endDateDayjs = _endDate
+    ? dayjs(_endDate, "YYYY-MM-DD")
+    : dayjs().endOf("day");
+
+  const duration = endDateDayjs.diff(startDateDayjs, "days");
+  const startDate = startDateDayjs.toDate();
+  const endDate = endDateDayjs.toDate();
+
   const today = dayjs().format("YYYY-MM-DD");
   const themeMode = useThemeMode();
 
@@ -121,7 +131,7 @@ export const Calendar = ({
             let classes: string[] = [];
             let level = 0;
             if (value?.count > 0 && summary && summary?.maxCount > 0) {
-              level = Math.floor((value?.count / summary.maxCount) * 5);
+              level = Math.ceil((value?.count / summary.maxCount) * 4);
             }
             classes.push(`color-github-${level}`);
             if (today === value?.date) {
@@ -170,7 +180,7 @@ export const Calendar = ({
               alignItems: "center",
             }}
           >
-            <span>In Last {NUM_WEEKS} Weeks -</span>
+            <span>In Last {duration} Days -</span>
             {showTotalTimes && (
               <span style={attrStyle}>
                 Total <strong>{summary.totalCount}</strong>{" "}
