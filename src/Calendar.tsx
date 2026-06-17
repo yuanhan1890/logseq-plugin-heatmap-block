@@ -19,7 +19,7 @@ type Datum = {
 
 const NUM_WEEKS = 25;
 const DEFAULT_TOOLTIP_TEMPLATE = "{date}: {count} times";
-const DEFAULT_TOOLTIP_FALLBACK = "无记录";
+const DEFAULT_TOOLTIP_FALLBACK = "No record";
 
 function renderTooltipTemplate(
   template: string,

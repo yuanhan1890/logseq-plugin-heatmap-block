@@ -27,7 +27,7 @@ For the query results, the plugin will attempt to parse whether they contain num
 | showLongestStreak | boolean? | Display the longest continuous active streak |
 | enableTooltip | boolean? | Enable heatmap cell tooltip. Defaults to `true` |
 | tooltipContentTemplate | string? | Tooltip content template for recorded days. Supports `{date}` and `{count}`. Defaults to `"{date}: {count} times"` |
-| tooltipFallback | string? | Tooltip content for days without records. Defaults to `"无记录"` |
+| tooltipFallback | string? | Tooltip content for days without records. Defaults to `"No record"` |
 
 
 ## Demo
@@ -58,6 +58,6 @@ For the query results, the plugin will attempt to parse whether they contain num
   "endDate": "2026-12-31",
   "enableTooltip": true,
   "tooltipContentTemplate": "{date}: {count} times",
-  "tooltipFallback": "无记录"
+  "tooltipFallback": "404"
 }
 ```
