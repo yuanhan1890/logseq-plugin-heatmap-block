@@ -29,3 +29,27 @@
 
 ![](./demo.png)
 ![](./demo1.png)
+
+### 浏览每天日志的block数量
+
+```clojure
+[:find ?d (count ?b)
+    :where
+    [?b :block/page ?p]
+    [?p :block/journal? true]
+    [?p :block/journal-day ?d]
+    [?b :block/content ?c]
+    [(clojure.string/blank? ?c) ?empty]
+    [(not ?empty)]
+    [(>= ?d 20260101)]
+    [(<= ?d 20261231)]
+]
+```
+
+```json
+{
+  "title": "📓✨✍️",
+  "startDate": "2026-01-01",
+  "endDate": "2026-12-31"
+}
+```

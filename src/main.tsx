@@ -95,8 +95,23 @@ function main() {
       return;
     }
 
+    const secondChild = blk.children[1] as BlockEntity;
+    let attributes: any = {};
+    if (secondChild) {
+      const attributesData = parseCodeBlock(secondChild.content || "");
+      try {
+        attributes = JSON.parse(attributesData);
+      } catch {
+        // ignore
+      }
+    }
+
     try {
       const queryResult: any[] = await logseq.DB.datascriptQuery(queryString);
+
+      if (attributes.debug) {
+        console.log("QUERY_RESULT", queryResult);
+      }
 
       const formattedData = map(
         mapValues(
@@ -104,12 +119,15 @@ function main() {
             queryResult.map((item: any) => {
               const journalDay = item[0];
               const content = item[1];
-              const cleanedContent = content.replace(
-                /\(\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\)\)/gi,
-                "",
-              );
-              let count = cleanedContent.match(/\d+/);
-              count = count != null ? Number(count[0]) : 1;
+              let count = content;
+              if (typeof content === "string") {
+                const cleanedContent = content.replace(
+                  /\(\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\)\)/gi,
+                  "",
+                );
+                count = cleanedContent.match(/\d+/);
+                count = count != null ? Number(count[0]) : 1;
+              }
               return {
                 date: formatJournalDay(journalDay),
                 count,
@@ -122,15 +140,8 @@ function main() {
         (value, key) => ({ date: key, count: value }),
       );
 
-      const secondChild = blk.children[1] as BlockEntity;
-      let attributes = {};
-      if (secondChild) {
-        const attributesData = parseCodeBlock(secondChild.content || "");
-        try {
-          attributes = JSON.parse(attributesData);
-        } catch {
-          // ignore
-        }
+      if (attributes.debug) {
+        console.log("FORMATTED_DATA", formattedData);
       }
 
       const containerId = `heatmap-root-${slot}`;

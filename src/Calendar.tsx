@@ -6,7 +6,7 @@ import { getLongestStreak, useThemeMode } from "./utils";
 import { getInterpolatedColor } from "./color";
 
 const attrStyle: CSSProperties = {
-  marginLeft: "8px",
+  marginRight: "8px",
   padding: "4px 8px",
   border: "1px dashed #333",
 };
@@ -180,7 +180,6 @@ export const Calendar = ({
               alignItems: "center",
             }}
           >
-            <span>In Last {duration} Days -</span>
             {showTotalTimes && (
               <span style={attrStyle}>
                 Total <strong>{summary.totalCount}</strong>{" "}
