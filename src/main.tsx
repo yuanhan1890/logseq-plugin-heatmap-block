@@ -5,6 +5,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Calendar } from "./Calendar";
 import { provideStyle } from "./provideStyle";
+import { provideTooltipStyle } from "./provideTooltipStyle";
 import { groupBy, map, mapValues, sumBy } from "lodash-es";
 
 function main() {
@@ -65,14 +66,16 @@ function main() {
   });
 
   provideStyle();
+  provideTooltipStyle();
 
   logseq.App.onMacroRendererSlotted(async ({ slot, payload }) => {
     const uuid = payload.uuid;
     const [type] = payload.arguments;
     if (!type) return;
 
+    const macroType = type.replace(/^:/, "");
     const heatmapId = `heatmap_${uuid}_${slot}`;
-    if (!type.startsWith(":heatmap") && !type.startsWith("heatmap")) return;
+    if (!macroType.startsWith("heatmap")) return;
 
     const blk = await logseq.Editor.getBlock(uuid, {
       includeChildren: true,

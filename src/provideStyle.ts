@@ -176,7 +176,8 @@ svg.react-calendar-heatmap {
 
 .react-calendar-heatmap rect {
     outline: 2px solid transparent;
-    outline-offset: 2px
+    outline-offset: 2px;
+    cursor: pointer
 }
 
 .react-calendar-heatmap rect:hover {
